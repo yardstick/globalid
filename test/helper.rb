@@ -1,15 +1,18 @@
+require 'ruby-debug'
+
 require 'bundler/setup'
 require 'active_support'
-require 'active_support/testing/autorun'
+require 'minitest/autorun'
+# require 'active_support/testing/autorun'
 
 require 'global_id'
 require 'models/person'
 require 'models/person_model'
-
 require 'json'
 
+
 if ActiveSupport::TestCase.respond_to?(:test_order=)
-  # TODO: remove check once ActiveSupport dependency is at least 4.2
+  # :TODO => remove check once ActiveSupport dependency is at least 4.2
   ActiveSupport::TestCase.test_order = :random
 end
 
@@ -19,5 +22,5 @@ GlobalID.app = 'bcx'
 # so use a trivial serializer for our tests.
 SERIALIZER = JSON
 
-VERIFIER = ActiveSupport::MessageVerifier.new('muchSECRETsoHIDDEN', serializer: SERIALIZER)
+VERIFIER = ActiveSupport::MessageVerifier.new('muchSECRETsoHIDDEN', :serializer => SERIALIZER)
 SignedGlobalID.verifier = VERIFIER

@@ -5,7 +5,7 @@ Gem::Specification.new do |s|
   s.summary     = 'Refer to any model with a URI: gid://app/class/id'
   s.description = 'URIs for your models makes it easy to pass references around.'
 
-  s.required_ruby_version = '>= 1.9.3'
+  s.required_ruby_version = '>= 1.8.7'
 
   s.license = 'MIT'
 
@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.files        = Dir['MIT-LICENSE', 'README.rdoc', 'lib/**/*']
   s.require_path = 'lib'
 
-  s.add_runtime_dependency 'activesupport', '>= 4.1.0'
+  s.add_runtime_dependency 'activesupport', '>= 3.0.0'
 
   s.add_development_dependency 'rake'
 end

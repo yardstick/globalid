@@ -2,11 +2,12 @@ require 'uri/generic'
 require 'active_support/core_ext/module/aliasing'
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/hash/indifferent_access'
+require 'cgi'
 
 module URI
   class GID < Generic
     # URI::GID encodes an app unique reference to a specific model as an URI.
-    # It has the components: app name, model class name, model id and params.
+    # It has the :components => app name, model class name, model id and params.
     # All components except params are required.
     #
     # The URI format looks like "gid://app/model_name/model_id".
@@ -44,7 +45,7 @@ module URI
         parse("gid://#{app}/Model/1").app
       rescue URI::Error
         raise ArgumentError, 'Invalid app name. ' \
-          'App names must be valid URI hostnames: alphanumeric and hyphen characters only.'
+          'App names must be valid URI :hostnames => alphanumeric and hyphen characters only.'
       end
 
       # Create a new URI::GID by parsing a gid string with argument check.
@@ -58,14 +59,16 @@ module URI
       #   URI::GID.parse('gid://bcx/') # => raises URI::InvalidComponentError
       def parse(uri)
         generic_components = URI.split(uri) << nil << true # nil parser, true arg_check
+        generic_components.delete_at(9) # 1.8.7 compatability
+
         new(*generic_components)
       end
 
       # Shorthand to build a URI::GID from an app, a model and optional params.
       #
-      #   URI::GID.create('bcx', Person.find(5), database: 'superhumans')
+      #   URI::GID.create('bcx', Person.find(5), :database => 'superhumans')
       def create(app, model, params = nil)
-        build app: app, model_name: model.class.name, model_id: model.id, params: params
+        build :app => app, :model_name => model.class.name, :model_id => model.id, :params => params
       end
 
       # Create a new URI::GID from components with argument check.
@@ -75,11 +78,11 @@ module URI
       #
       # Using a hash:
       #
-      #   URI::GID.build(app: 'bcx', model_name: 'Person', model_id: '1', params: { key: 'value' })
+      #   URI::GID.build(:app => 'bcx', :model_name => 'Person', :model_id => '1', :params => { :key => 'value' })
       #
       # Using an array, the arguments must be in order [app, model_name, model_id, params]:
       #
-      #   URI::GID.build(['bcx', 'Person', '1', key: 'value'])
+      #   URI::GID.build(['bcx', 'Person', '1', :key => 'value'])
       def build(args)
         parts = Util.make_components_hash(self, args)
         parts[:host] = parts[:app]
@@ -140,7 +143,7 @@ module URI
         if scheme == 'gid'
           super
         else
-          raise URI::BadURIError, "Not a gid:// URI scheme: #{inspect}"
+          raise URI::BadURIError, "Not a gid:// URI :scheme => #{inspect}"
         end
       end
 
@@ -158,7 +161,7 @@ module URI
         return component unless component.blank?
 
         raise URI::InvalidComponentError,
-          "Expected a URI like gid://app/Person/1234: #{inspect}"
+          "Expected a URI like gid://app/Person/:1234 => #{inspect}"
       end
 
       def validate_model_id(model_id, model_name)

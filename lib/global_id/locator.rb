@@ -25,7 +25,7 @@ class GlobalID
       # By default the GlobalIDs will be located using Model.find(array_of_ids), so the
       # models must respond to that finder signature.
       #
-      # This approach will efficiently call only one #find (or #where(id: id), when using ignore_missing)
+      # This approach will efficiently call only one #find (or #where(:id => id), when using ignore_missing)
       # per model class, but still interpolate the results to match the order in which the gids were passed.
       #
       # Options:
@@ -37,7 +37,7 @@ class GlobalID
       # * <tt>:ignore_missing</tt> - By default, locate_many will call #find on the model to locate the
       #   ids extracted from the GIDs. In Active Record (and other data stores following the same pattern),
       #   #find will raise an exception if a named ID can't be found. When you set this option to true,
-      #   we will use #where(id: ids) instead, which does not raise on missing records.
+      #   we will use #where(:id => ids) instead, which does not raise on missing records.
       def locate_many(gids, options = {})
         if (allowed_gids = parse_allowed(gids, options[:only])).any?
           locator = locator_for(allowed_gids.first)
@@ -93,7 +93,7 @@ class GlobalID
       #
       #   class BarLocator
       #     def locate(gid)
-      #       @search_client.search name: gid.model_name, id: gid.model_id
+      #       @search_client.search :name => gid.model_name, :id => gid.model_id
       #     end
       #   end
       def use(app, locator = nil, &locator_block)
@@ -134,7 +134,7 @@ class GlobalID
           models_and_ids  = gids.collect { |gid| [ gid.model_class, gid.model_id ] }
           ids_by_model    = models_and_ids.group_by(&:first)
           loaded_by_model = Hash[ids_by_model.map { |model, ids|
-            [ model, find_records(model, ids.map(&:last), ignore_missing: options[:ignore_missing]).index_by { |record| record.id.to_s } ]
+            [ model, find_records(model, ids.map(&:last), { :ignore_missing => options[:ignore_missing]).index_by { |record| record.id.to_s }} ]
           }]
 
           models_and_ids.collect { |(model, id)| loaded_by_model[model][id] }.compact
@@ -143,7 +143,7 @@ class GlobalID
         private
           def find_records(model_class, ids, options)
             if options[:ignore_missing]
-              model_class.where(id: ids)
+              model_class.where(:id => ids)
             else
               model_class.find(ids)
             end

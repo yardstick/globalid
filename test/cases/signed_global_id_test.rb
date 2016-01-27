@@ -55,14 +55,14 @@ class SignedGlobalIDVerifierTest < ActiveSupport::TestCase
 
   test 'create accepts a :verifier' do
     with_default_verifier nil do
-      expected = SignedGlobalID.create(Person.new(5), verifier: VERIFIER)
+      expected = SignedGlobalID.create(Person.new(5), :verifier => VERIFIER)
       assert_equal @person_sgid, expected
     end
   end
 
   test 'new accepts a :verifier' do
     with_default_verifier nil do
-      expected = SignedGlobalID.new(Person.new(5).to_gid.uri, verifier: VERIFIER)
+      expected = SignedGlobalID.new(Person.new(5).to_gid.uri, :verifier => VERIFIER)
       assert_equal @person_sgid, expected
     end
   end
@@ -77,7 +77,7 @@ end
 
 class SignedGlobalIDPurposeTest < ActiveSupport::TestCase
   setup do
-    @login_sgid = SignedGlobalID.create(Person.new(5), for: 'login')
+    @login_sgid = SignedGlobalID.create(Person.new(5), :for => 'login')
   end
 
   test 'sign with purpose when :for is provided' do
@@ -86,31 +86,31 @@ class SignedGlobalIDPurposeTest < ActiveSupport::TestCase
 
   test 'sign with default purpose when no :for is provided' do
     sgid = SignedGlobalID.create(Person.new(5))
-    default_sgid = SignedGlobalID.create(Person.new(5), for: "default")
+    default_sgid = SignedGlobalID.create(Person.new(5), :for => "default")
 
     assert_equal "eyJnaWQiOiJnaWQ6Ly9iY3gvUGVyc29uLzUiLCJwdXJwb3NlIjoiZGVmYXVsdCIsImV4cGlyZXNfYXQiOm51bGx9--04a6f59140259756b22008c8c0f76ea5ed485579", sgid.to_s
     assert_equal sgid, default_sgid
   end
 
   test 'create accepts a :for' do
-    expected = SignedGlobalID.create(Person.new(5), for: "login")
+    expected = SignedGlobalID.create(Person.new(5), :for => "login")
     assert_equal @login_sgid, expected
   end
 
   test 'new accepts a :for' do
-    expected = SignedGlobalID.new(Person.new(5).to_gid.uri, for: 'login')
+    expected = SignedGlobalID.new(Person.new(5).to_gid.uri, :for => 'login')
     assert_equal @login_sgid, expected
   end
 
   test 'parse returns nil when purpose mismatch' do
     sgid = @login_sgid.to_s
     assert_nil SignedGlobalID.parse sgid
-    assert_nil SignedGlobalID.parse sgid, for: 'like_button'
+    assert_nil SignedGlobalID.parse sgid, :for => 'like_button'
   end
 
   test 'equal only with same purpose' do
-    expected = SignedGlobalID.create(Person.new(5), for: 'login')
-    like_sgid = SignedGlobalID.create(Person.new(5), for: 'like_button')
+    expected = SignedGlobalID.create(Person.new(5), :for => 'login')
+    like_sgid = SignedGlobalID.create(Person.new(5), :for => 'like_button')
     no_purpose_sgid = SignedGlobalID.create(Person.new(5))
 
     assert_equal @login_sgid, expected
@@ -138,7 +138,7 @@ class SignedGlobalIDExpirationTest < ActiveSupport::TestCase
 
   test 'passing in expires_in overrides class level expiration' do
     with_expiration_in 1.hour do
-      encoded_sgid = SignedGlobalID.new(@uri, expires_in: 2.hours).to_s
+      encoded_sgid = SignedGlobalID.new(@uri, :expires_in => 2.hours).to_s
 
       travel 1.hour
       assert SignedGlobalID.parse(encoded_sgid)
@@ -149,7 +149,7 @@ class SignedGlobalIDExpirationTest < ActiveSupport::TestCase
   end
 
   test 'passing expires_in less than a second is not expired' do
-    encoded_sgid = SignedGlobalID.new(@uri, expires_in: 1.second).to_s
+    encoded_sgid = SignedGlobalID.new(@uri, :expires_in => 1.second).to_s
     present = Time.now
 
     Time.stub :now, present + 0.5.second do
@@ -163,7 +163,7 @@ class SignedGlobalIDExpirationTest < ActiveSupport::TestCase
 
   test 'passing expires_in nil turns off expiration checking' do
     with_expiration_in 1.hour do
-      encoded_sgid = SignedGlobalID.new(@uri, expires_in: nil).to_s
+      encoded_sgid = SignedGlobalID.new(@uri, :expires_in => nil).to_s
 
       travel 1.hour
       assert SignedGlobalID.parse(encoded_sgid)
@@ -175,7 +175,7 @@ class SignedGlobalIDExpirationTest < ActiveSupport::TestCase
 
   test 'passing expires_at sets expiration date' do
     date = Date.today.end_of_day
-    sgid = SignedGlobalID.new(@uri, expires_at: date)
+    sgid = SignedGlobalID.new(@uri, :expires_at => date)
 
     assert_equal date, sgid.expires_at
 
@@ -185,7 +185,7 @@ class SignedGlobalIDExpirationTest < ActiveSupport::TestCase
 
   test 'passing nil expires_at turns off expiration checking' do
     with_expiration_in 1.hour do
-      encoded_sgid = SignedGlobalID.new(@uri, expires_at: nil).to_s
+      encoded_sgid = SignedGlobalID.new(@uri, :expires_at => nil).to_s
 
       travel 4.hours
       assert SignedGlobalID.parse(encoded_sgid)
@@ -195,7 +195,7 @@ class SignedGlobalIDExpirationTest < ActiveSupport::TestCase
   test 'passing expires_at overrides class level expires_in' do
     with_expiration_in 1.hour do
       date = Date.tomorrow.end_of_day
-      sgid = SignedGlobalID.new(@uri, expires_at: date)
+      sgid = SignedGlobalID.new(@uri, :expires_at => date)
 
       assert_equal date, sgid.expires_at
 
@@ -205,7 +205,7 @@ class SignedGlobalIDExpirationTest < ActiveSupport::TestCase
   end
 
   test 'favor expires_at over expires_in' do
-    sgid = SignedGlobalID.new(@uri, expires_at: Date.tomorrow.end_of_day, expires_in: 1.hour)
+    sgid = SignedGlobalID.new(@uri, :expires_at => Date.tomorrow.end_of_day, :expires_in => 1.hour)
 
     travel 1.hour
     assert SignedGlobalID.parse(sgid.to_s)
@@ -222,7 +222,7 @@ end
 
 class SignedGlobalIDCustomParamsTest < ActiveSupport::TestCase
   test 'create custom params' do
-    sgid = SignedGlobalID.create(Person.new(5), hello: 'world')
+    sgid = SignedGlobalID.create(Person.new(5), :hello => 'world')
     assert_equal 'world', sgid.params[:hello]
   end
 

@@ -25,7 +25,7 @@ class URI::GIDTest <  ActiveSupport::TestCase
     array = URI::GID.build(['bcx', 'Person', '5', nil])
     assert array
 
-    hash = URI::GID.build(app: 'bcx', model_name: 'Person', model_id: '5', params: nil)
+    hash = URI::GID.build(:app => 'bcx', :model_name => 'Person', :model_id => '5', :params => nil)
     assert hash
 
     assert_equal array, hash
@@ -129,7 +129,7 @@ end
 
 class URI::GIDParamsTest < ActiveSupport::TestCase
   setup do
-    @gid = URI::GID.create('bcx', Person.find(5), hello: 'world')
+    @gid = URI::GID.create('bcx', Person.find(5), :hello => 'world')
   end
 
   test 'indifferent key access' do
@@ -138,12 +138,12 @@ class URI::GIDParamsTest < ActiveSupport::TestCase
   end
 
   test 'integer option' do
-    gid = URI::GID.build(['bcx', 'Person', '5', integer: 20])
+    gid = URI::GID.build(['bcx', 'Person', '5', { :integer => 20 }])
     assert_equal '20', gid.params[:integer]
   end
 
   test 'multi value params returns last value' do
-    gid = URI::GID.build(['bcx', 'Person', '5', multi: %w(one two)])
+    gid = URI::GID.build(['bcx', 'Person', '5', { :multi => %w(one two) }])
     exp = { 'multi' => 'two' }
     assert_equal exp, gid.params
   end
