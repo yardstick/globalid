@@ -1,7 +1,5 @@
 require 'helper'
 
-puts 'woaaaah'
-
 class GlobalIDTest < ActiveSupport::TestCase
   test 'value equality' do
     assert_equal GlobalID.new('gid://app/model/id'), GlobalID.new('gid://app/model/id')

@@ -1,5 +1,4 @@
 require 'rails'
-require 'global_id/railtie'
 require 'active_support/testing/isolation'
 
 

@@ -133,10 +133,7 @@ class GlobalID
         def locate_many(gids, options = {})
           models_and_ids  = gids.collect { |gid| [ gid.model_class, gid.model_id ] }
           ids_by_model    = models_and_ids.group_by(&:first)
-          loaded_by_model = Hash[ids_by_model.map { |model, ids|
-            [ model, find_records(model, ids.map(&:last), { :ignore_missing => options[:ignore_missing]).index_by { |record| record.id.to_s }} ]
-          }]
-
+          loaded_by_model = Hash[ids_by_model.map { |model, ids| [model, find_records(model, ids.map(&:last), { :ignore_missing => options[:ignore_missing] }).index_by { |record| record.id.to_s } ] }]
           models_and_ids.collect { |(model, id)| loaded_by_model[model][id] }.compact
         end
 

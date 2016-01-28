@@ -1,7 +1,7 @@
 require 'active_support'
 require 'active_support/core_ext/string/inflections'  # For #model_class constantize
 require 'active_support/core_ext/array/access'
-require 'active_support/core_ext/object/try'          # For #find
+# require 'active_support/core_ext/object/try'          # For #find
 require 'active_support/core_ext/module/delegation'
 require 'global_id/uri/gid'
 
