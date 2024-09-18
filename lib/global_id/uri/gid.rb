@@ -176,6 +176,6 @@ module URI
       end
   end
 
-  @@schemes ||= []
+  @@schemes ||= {}
   @@schemes['GID'] = GID
 end
